@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chirp — Cash Load Demo</title>
+  <style>
+
+    /* =====================================================================
+       BRAND TOKENS
+       All partner-overridable values live here. To theme for a partner,
+       replace this block — no component markup changes needed.
+       ===================================================================== */
+    :root {
+      /* Core palette */
+      --brand-primary:          #2D9B6F;
+      --brand-primary-dark:     #1E6E4D;
+      --brand-primary-light:    #E8F7F1;
+      --brand-secondary:        #1A2E4A;
+      --brand-accent:           #F5A623;
+
+      /* Surfaces & text */
+      --brand-bg:               #F4F6F8;
+      --brand-surface:          #FFFFFF;
+      --brand-text:             #1A2E4A;
+      --brand-text-secondary:   #6B7A8D;
+      --brand-border:           #E0E6ED;
+
+      /* Semantic */
+      --brand-success:          #2D9B6F;
+      --brand-error:            #E53E3E;
+
+      /* Typography */
+      --brand-font:             -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --brand-font-size:        16px;
+
+      /* App chrome */
+      --app-statusbar-bg:       var(--brand-primary);
+      --app-statusbar-color:    #FFFFFF;
+      --app-navbar-bg:          var(--brand-surface);
+      --app-tabbar-bg:          var(--brand-surface);
+
+      /* Brand identity */
+      --brand-name:             "Chirp";
+      --brand-logo-url:         none;   /* set to url('...') for logo image */
+    }
+
+    /* =====================================================================
+       RESET
+       ===================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--brand-font);
+      font-size: var(--brand-font-size);
+      background: #111827;
+      color: var(--brand-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* =====================================================================
+       PAGE LAYOUT
+       ===================================================================== */
+    .demo-stage {
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+      padding: 48px 40px;
+      max-width: 1280px;
+      width: 100%;
+    }
+
+    /* =====================================================================
+       PHONE FRAME
+       ===================================================================== */
+    .phone-frame {
+      flex-shrink: 0;
+      width: 375px;
+      height: 812px;
+      background: var(--brand-surface);
+      border-radius: 54px;
+      border: 10px solid #0a0a0a;
+      box-shadow:
+        inset 0 0 0 1px #333,
+        0 0 0 1px #0a0a0a,
+        0 40px 100px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Notch */
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 126px;
+      height: 30px;
+      background: #0a0a0a;
+      border-radius: 0 0 20px 20px;
+      z-index: 100;
+    }
+
+    /* =====================================================================
+       APP VIEWPORT — everything the simulated app renders inside
+       ===================================================================== */
+    .app-viewport {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      background: var(--brand-bg);
+    }
+
+    /* =====================================================================
+       SCREENS
+       ===================================================================== */
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: var(--brand-bg);
+      display: none;
+      flex-direction: column;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Placeholder body used until real screen content is built */
+    .screen-placeholder {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .screen-placeholder .phase-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--brand-primary);
+      background: var(--brand-primary-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .screen-placeholder .screen-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--brand-text);
+    }
+
+    .screen-placeholder .screen-id {
+      font-size: 12px;
+      color: var(--brand-text-secondary);
+      font-family: monospace;
+    }
+
+    /* =====================================================================
+       DEV NAV — temporary; will be replaced by in-app navigation controls
+       ===================================================================== */
+    .dev-nav {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.04);
+      border-top: 1px solid var(--brand-border);
+    }
+
+    .dev-nav button {
+      padding: 5px 14px;
+      border: 1px solid var(--brand-border);
+      background: var(--brand-surface);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: var(--brand-font);
+      color: var(--brand-text);
+      transition: opacity 0.15s;
+    }
+
+    .dev-nav button:hover:not(:disabled) {
+      background: var(--brand-bg);
+    }
+
+    .dev-nav button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .dev-nav .nav-counter {
+      font-size: 11px;
+      color: var(--brand-text-secondary);
+    }
+
+    /* =====================================================================
+       COMMENTARY PANEL
+       ===================================================================== */
+    .commentary-panel {
+      flex: 1;
+      min-width: 0;
+      align-self: stretch;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 40px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      transition: opacity 0.2s;
+    }
+
+    .commentary-panel .phase-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--brand-accent);
+      margin-bottom: 12px;
+    }
+
+    .commentary-panel h2 {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    .commentary-body p {
+      font-size: 14px;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 14px;
+    }
+
+    .commentary-body ul {
+      margin: 4px 0 16px 0;
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .commentary-body li {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .commentary-links {
+      margin-top: auto;
+      padding-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .commentary-links a {
+      font-size: 13px;
+      color: var(--brand-accent);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+
+    .commentary-links a::before {
+      content: '↗';
+    }
+
+    .commentary-links a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="demo-stage">
+
+    <!-- ── Phone Frame ─────────────────────────────────────────────────── -->
+    <div class="phone-frame">
+
+      <div class="app-viewport" id="app-viewport">
+
+        <div class="screen active" data-screen="home">
+          <div class="screen-placeholder">
+            <span class="phase-label">Phase 1 · Screen 1</span>
+            <span class="screen-name">Home / Entry Point</span>
+            <span class="screen-id">home</span>
+          </div>
+        </div>
+
+        <div class="screen" data-screen="location-select">
+          <div class="screen-placeholder">
+            <span class="phase-label">Phase 1 · Screen 2</span>
+            <span class="screen-name">Retail Location Selector</span>
+            <span class="screen-id">location-select</span>
+          </div>
+        </div>
+
+        <div class="screen" data-screen="barcode">
+          <div class="screen-placeholder">
+            <span class="phase-label">Phase 1 · Screen 3</span>
+            <span class="screen-name">Barcode Generation</span>
+            <span class="screen-id">barcode</span>
+          </div>
+        </div>
+
+        <div class="screen" data-screen="interstitial">
+          <div class="screen-placeholder">
+            <span class="phase-label">Interstitial</span>
+            <span class="screen-name">En Route to Store</span>
+            <span class="screen-id">interstitial</span>
+          </div>
+        </div>
+
+        <div class="screen" data-screen="scan">
+          <div class="screen-placeholder">
+            <span class="phase-label">Phase 2 · Screen 1</span>
+            <span class="screen-name">Barcode Scan at Register</span>
+            <span class="screen-id">scan</span>
+          </div>
+        </div>
+
+        <div class="screen" data-screen="remittance">
+          <div class="screen-placeholder">
+            <span class="phase-label">Phase 2 · Screen 2</span>
+            <span class="screen-name">Cash Remittance</span>
+            <span class="screen-id">remittance</span>
+          </div>
+        </div>
+
+        <div class="screen" data-screen="confirmation">
+          <div class="screen-placeholder">
+            <span class="phase-label">Phase 2 · Screen 3</span>
+            <span class="screen-name">Load Confirmation</span>
+            <span class="screen-id">confirmation</span>
+          </div>
+        </div>
+
+      </div><!-- /app-viewport -->
+
+      <!-- Temporary dev navigation — replaced by in-app nav in Issue #4 -->
+      <div class="dev-nav">
+        <button id="btn-prev" onclick="navigate(-1)" disabled>← Back</button>
+        <span class="nav-counter" id="nav-counter"></span>
+        <button id="btn-next" onclick="navigate(1)">Next →</button>
+      </div>
+
+    </div><!-- /phone-frame -->
+
+
+    <!-- ── Commentary Panel ────────────────────────────────────────────── -->
+    <div class="commentary-panel" id="commentary-panel">
+      <span class="phase-badge" id="commentary-badge"></span>
+      <h2 id="commentary-title"></h2>
+      <div class="commentary-body" id="commentary-body"></div>
+      <div class="commentary-links" id="commentary-links"></div>
+    </div>
+
+  </div><!-- /demo-stage -->
+
+
+  <script>
+    // =========================================================================
+    // SCREEN ORDER
+    // Add, remove, or reorder screen IDs here to change the demo flow.
+    // Each ID must match a data-screen attribute on a .screen element above.
+    // =========================================================================
+    const SCREENS = [
+      'home',
+      'location-select',
+      'barcode',
+      'interstitial',
+      'scan',
+      'remittance',
+      'confirmation',
+    ];
+
+    // =========================================================================
+    // COMMENTARY CONTENT
+    // Keyed by screen ID. Each entry: { badge, title, body (HTML), links[] }
+    // Populated in Issue #6 — placeholders below keep the panel functional.
+    // =========================================================================
+    const COMMENTARY = {
+      'home': {
+        badge: 'Phase 1 — In App',
+        title: 'Accessing Cash Loads',
+        body: '<p>Placeholder — commentary for the home screen goes here.</p>',
+        links: [],
+      },
+      'location-select': {
+        badge: 'Phase 1 — In App',
+        title: 'Finding a Retail Location',
+        body: '<p>Placeholder — commentary for the location selector goes here.</p>',
+        links: [],
+      },
+      'barcode': {
+        badge: 'Phase 1 — In App',
+        title: 'Your Load Barcode',
+        body: '<p>Placeholder — commentary for barcode generation goes here.</p>',
+        links: [],
+      },
+      'interstitial': {
+        badge: 'Transition',
+        title: 'Heading to the Store',
+        body: '<p>Placeholder — commentary for the interstitial experience goes here.</p>',
+        links: [],
+      },
+      'scan': {
+        badge: 'Phase 2 — At the Register',
+        title: 'Barcode Scanned',
+        body: '<p>Placeholder — commentary for the scan step goes here.</p>',
+        links: [],
+      },
+      'remittance': {
+        badge: 'Phase 2 — At the Register',
+        title: 'Handing Over Cash',
+        body: '<p>Placeholder — commentary for cash remittance goes here.</p>',
+        links: [],
+      },
+      'confirmation': {
+        badge: 'Phase 2 — At the Register',
+        title: 'Load Complete',
+        body: '<p>Placeholder — commentary for the confirmation screen goes here.</p>',
+        links: [],
+      },
+    };
+
+    // =========================================================================
+    // STATE
+    // =========================================================================
+    let currentIndex = 0;
+
+    // =========================================================================
+    // NAVIGATION
+    // =========================================================================
+    function navigate(delta) {
+      goTo(currentIndex + delta);
+    }
+
+    function goTo(index) {
+      if (index < 0 || index >= SCREENS.length) return;
+
+      // Swap active screen
+      document.querySelector('.screen.active')?.classList.remove('active');
+      currentIndex = index;
+      const screenId = SCREENS[currentIndex];
+      document.querySelector(`.screen[data-screen="${screenId}"]`)?.classList.add('active');
+
+      // Update commentary
+      const c = COMMENTARY[screenId] || {};
+      document.getElementById('commentary-badge').textContent  = c.badge || '';
+      document.getElementById('commentary-title').textContent  = c.title || '';
+      document.getElementById('commentary-body').innerHTML     = c.body  || '';
+
+      const linksEl = document.getElementById('commentary-links');
+      linksEl.innerHTML = '';
+      (c.links || []).forEach(({ label, url }) => {
+        const a = document.createElement('a');
+        a.href        = url;
+        a.textContent = label;
+        a.target      = '_blank';
+        a.rel         = 'noopener noreferrer';
+        linksEl.appendChild(a);
+      });
+
+      // Update dev nav controls
+      document.getElementById('btn-prev').disabled    = currentIndex === 0;
+      document.getElementById('btn-next').disabled    = currentIndex === SCREENS.length - 1;
+      document.getElementById('nav-counter').textContent =
+        `${currentIndex + 1} / ${SCREENS.length}`;
+    }
+
+    // =========================================================================
+    // INIT
+    // =========================================================================
+    goTo(0);
+  </script>
+
+</body>
+</html>
