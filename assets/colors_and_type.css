@@ -1,0 +1,184 @@
+/* ============================================================================
+   GO2bank Design System — Colors & Type
+   ----------------------------------------------------------------------------
+   Source of truth: GO2bank "UX Refresh" Figma files (MVP Home Screen,
+   Pre-login/Login/Logout, Web Login & Recovery). GO2bank is a Green Dot brand.
+
+   FONTS — real licensed fonts are loaded from /fonts via @font-face below:
+     • Averta   (primary brand / UI / buttons / headings) — weights 400/600/700/800
+     • Poppins  (numerics: balances, tabs, transactions)  — weights 400/500/600/700/800
+     • Bogle    (Walmart family font, some body/footers)   — weights 400/700
+   ============================================================================ */
+
+@font-face { font-family: 'Averta'; src: url('fonts/Averta-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Averta'; src: url('fonts/Averta-Semibold.otf') format('opentype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Averta'; src: url('fonts/Averta-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Averta'; src: url('fonts/Averta-Extrabold.otf') format('opentype'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Bogle'; src: url('fonts/Bogle-Regular.otf') format('opentype'); font-weight: 400 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Bogle'; src: url('fonts/Bogle-Bold.otf') format('opentype'); font-weight: 600 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('fonts/Poppins-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('fonts/Poppins-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('fonts/Poppins-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('fonts/Poppins-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('fonts/Poppins-ExtraBold.ttf') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Source Sans Pro'; src: url('fonts/SourceSansPro-Italic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
+
+/* Token source of truth: GreenDot Mobile SDK — Core/Theming/Theming/mobile.json
+   (the GO2bank-themed BaaS theme). Values below mirror those tokens. */
+:root {
+  /* ---- Font families (real licensed fonts now in /fonts) -------------- */
+  --font-brand:   'Averta', system-ui, sans-serif;   /* primary brand / UI / buttons / headings / numbers (shipped app) */
+  --font-numeric: 'Poppins', system-ui, sans-serif;  /* balances/tabs in the UX-Refresh mockups (see note) */
+  --font-walmart: 'Bogle', system-ui, sans-serif;    /* Walmart-family: promo body, web legal */
+  --font-fdic:    'Source Sans Pro', Georgia, serif; /* FDIC / legal disclosure — italic 12.8px, line 1.1 */
+
+  /* ---- Brand palette (mobile.json: core.color.*) ---------------------- */
+  --go-blue:        #2945FF;  /* core.color.brand / primary — buttons, links, selection */
+  --go-blue-press:  #0021FF;  /* btn.primary.active.color.bg (pressed)               */
+  --go-blue-hover:  #1A38FF;  /* btn.secondary.active border/text (hover/active)     */
+  --go-navy:        #020D77;  /* core.color.canvas.brand — deep brand / logo         */
+  --go-navy-2:      #131D5D;  /* login header gradient end                           */
+  --go-target-blue: #1791F5;  /* logo "target" + "bank" wordmark                      */
+  --blue-tint:      #CCD3FF;  /* btn.secondary.active.color.bg                       */
+  --icon-chip-bg:   #E5E9FF;  /* list/context icon circle bg (list.icon.color.bg)    */
+
+  /* ---- Neutrals / grey ramp (mobile.json: core.color.grey.01–10) ------ */
+  --grey-01: #F7F7F7;  --grey-02: #F2F2F2;  --grey-03: #E5E5E5;  --grey-04: #DDDDDD;
+  --grey-05: #CCCCCC;  --grey-06: #8C8C8C;  --grey-07: #666666;  --grey-08: #4D4D4D;
+  --grey-09: #333333;  --grey-10: #262626;
+  --ink:           #000000;   /* core.color.text / headings                          */
+  --ink-strong:    #262626;   /* grey.10 — body strong / vendor names                */
+  --ink-muted:     #666666;   /* grey.07 / text.alt — secondary text, dates          */
+  --ink-faint:     #8C8C8C;   /* grey.06 — disabled icon / faint / accessible border */
+
+  /* ---- Surfaces ------------------------------------------------------- */
+  --surface:        #FFFFFF;  /* core.color.canvas                                   */
+  --surface-alt:    #F2F2F2;  /* core.color.canvas.alt / grey.02                     */
+  --surface-alt-2:  #F7F7F7;  /* grey.01                                             */
+  --tint-blue:      #E1EEF9;  /* core.color.info / banner.info bg                    */
+  --tint-blue-2:    #F2F8FD;  /* faint blue wash                                     */
+
+  /* ---- Lines & borders ------------------------------------------------ */
+  --line:          #E5E5E5;   /* grey.03 / universal.decorative.border               */
+  --line-2:        #D1D5DB;   /* light gray fills                                    */
+  --input-border:  #8C8C8C;   /* form default outline / accessible.border            */
+
+  /* ---- Semantic (mobile.json) ----------------------------------------- */
+  --success:       #008537;   /* core.color.affirmative — badges/banners             */
+  --success-text:  #008035;   /* transactions.positive.color.text — credit amounts   */
+  --error:         #E0114C;   /* core.color.error / destructive                      */
+  --error-text:    #D51048;   /* core.color.text.error / transactions.negative       */
+  --error-press:   #BE0E40;   /* destructive active / error border                   */
+  --error-tint:    #FDE7EE;   /* form.input.error.color.bg                           */
+  --warning:       #E85E02;   /* core.color.cautionary                               */
+
+  /* ---- Elevation / shadow --------------------------------------------- */
+  --shadow-card:   0 0 10px 0 rgba(0,0,0,0.25);  /* white cards, headers, nav      */
+  --shadow-soft:   0 0 6px 0 rgba(0,0,0,0.10);   /* subtle header edge             */
+  --shadow-modal:  0 0 20px 0 rgba(0,0,0,0.40);  /* sheets / device frame          */
+
+  /* ---- Radii ---------------------------------------------------------- */
+  --radius-pill:   71px;      /* primary buttons (fully rounded)                   */
+  --radius-card:   12px;      /* cards, promo tiles                                */
+  --radius-screen: 16px;      /* device screen / large containers                  */
+  --radius-input:  4px;       /* text inputs                                       */
+  --radius-chip:   18px;      /* secondary (outline) buttons                       */
+
+  /* ---- Gradients ------------------------------------------------------ */
+  --grad-header: linear-gradient(180deg, var(--go-blue) 0%, var(--go-navy-2) 100%);
+
+  /* ---- Type tokens (semantic) ----------------------------------------- */
+  /* Balance hero — Poppins ExtraBold, tight tracking */
+  --t-balance-size: 80px;  --t-balance-weight: 700;  --t-balance-tracking: -0.03em;
+  /* Display / welcome — Averta(Mulish) */
+  --t-display-size: 36px;  --t-display-weight: 700;  --t-display-tracking: -0.03em;
+  /* Section title — Poppins Bold */
+  --t-title-size: 19px;    --t-title-weight: 700;    --t-title-tracking: -0.03em;
+  /* Pre-login heading — Averta Bold */
+  --t-h2-size: 22px;       --t-h2-weight: 700;       --t-h2-tracking: -0.03em;
+  /* Body */
+  --t-body-size: 16px;     --t-body-weight: 400;     --t-body-line: 1.4;
+  /* Label / list primary — Poppins Bold 15 */
+  --t-label-size: 15px;    --t-label-weight: 700;
+  /* Caption / dates — Poppins 13 */
+  --t-caption-size: 13px;  --t-caption-weight: 400;
+  /* Micro / legal — 12 */
+  --t-micro-size: 12px;    --t-micro-weight: 400;
+}
+
+/* ============================================================================
+   Semantic element defaults — apply on a scoped wrapper (.g2b) so kits opt in.
+   ============================================================================ */
+.g2b {
+  font-family: var(--font-brand);
+  color: var(--ink-strong);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.g2b h1, .g2b .t-display {
+  font-family: var(--font-brand);
+  font-weight: var(--t-display-weight);
+  font-size: var(--t-display-size);
+  letter-spacing: var(--t-display-tracking);
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0;
+}
+.g2b h2, .g2b .t-h2 {
+  font-family: var(--font-brand);
+  font-weight: var(--t-h2-weight);
+  font-size: var(--t-h2-size);
+  letter-spacing: var(--t-h2-tracking);
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0;
+}
+.g2b h3, .g2b .t-title {
+  font-family: var(--font-numeric);
+  font-weight: var(--t-title-weight);
+  font-size: var(--t-title-size);
+  letter-spacing: var(--t-title-tracking);
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0;
+}
+.g2b .t-balance {
+  font-family: var(--font-numeric);
+  font-weight: var(--t-balance-weight);
+  font-size: var(--t-balance-size);
+  letter-spacing: var(--t-balance-tracking);
+  line-height: 1.2;
+  color: var(--ink);
+}
+.g2b p, .g2b .t-body {
+  font-family: var(--font-brand);
+  font-weight: var(--t-body-weight);
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-line);
+  color: var(--ink-strong);
+  margin: 0;
+}
+.g2b .t-label {
+  font-family: var(--font-numeric);
+  font-weight: var(--t-label-weight);
+  font-size: var(--t-label-size);
+  color: var(--ink-strong);
+}
+.g2b .t-caption {
+  font-family: var(--font-numeric);
+  font-weight: var(--t-caption-weight);
+  font-size: var(--t-caption-size);
+  line-height: 1.4;
+  color: var(--ink-muted);
+}
+.g2b .t-micro {
+  font-size: var(--t-micro-size);
+  line-height: 1.4;
+  color: var(--ink-muted);
+}
+.g2b a, .g2b .t-link {
+  color: var(--go-blue);
+  text-decoration: underline;
+  cursor: pointer;
+}

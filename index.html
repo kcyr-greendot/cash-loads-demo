@@ -4,502 +4,607 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chirp — Cash Load Demo</title>
-  <style>
-
-    /* =====================================================================
-       BRAND TOKENS
-       All partner-overridable values live here. To theme for a partner,
-       replace this block — no component markup changes needed.
-       ===================================================================== */
-    :root {
-      /* Core palette */
-      --brand-primary:          #2D9B6F;
-      --brand-primary-dark:     #1E6E4D;
-      --brand-primary-light:    #E8F7F1;
-      --brand-secondary:        #1A2E4A;
-      --brand-accent:           #F5A623;
-
-      /* Surfaces & text */
-      --brand-bg:               #F4F6F8;
-      --brand-surface:          #FFFFFF;
-      --brand-text:             #1A2E4A;
-      --brand-text-secondary:   #6B7A8D;
-      --brand-border:           #E0E6ED;
-
-      /* Semantic */
-      --brand-success:          #2D9B6F;
-      --brand-error:            #E53E3E;
-
-      /* Typography */
-      --brand-font:             -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --brand-font-size:        16px;
-
-      /* App chrome */
-      --app-statusbar-bg:       var(--brand-primary);
-      --app-statusbar-color:    #FFFFFF;
-      --app-navbar-bg:          var(--brand-surface);
-      --app-tabbar-bg:          var(--brand-surface);
-
-      /* Brand identity */
-      --brand-name:             "Chirp";
-      --brand-logo-url:         none;   /* set to url('...') for logo image */
-    }
-
-    /* =====================================================================
-       RESET
-       ===================================================================== */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: var(--brand-font);
-      font-size: var(--brand-font-size);
-      background: #111827;
-      color: var(--brand-text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* =====================================================================
-       PAGE LAYOUT
-       ===================================================================== */
-    .demo-stage {
-      display: flex;
-      align-items: flex-start;
-      gap: 48px;
-      padding: 48px 40px;
-      max-width: 1280px;
-      width: 100%;
-    }
-
-    /* =====================================================================
-       PHONE FRAME
-       ===================================================================== */
-    .phone-frame {
-      flex-shrink: 0;
-      width: 375px;
-      height: 812px;
-      background: var(--brand-surface);
-      border-radius: 54px;
-      border: 10px solid #0a0a0a;
-      box-shadow:
-        inset 0 0 0 1px #333,
-        0 0 0 1px #0a0a0a,
-        0 40px 100px rgba(0, 0, 0, 0.7);
-      overflow: hidden;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Notch */
-    .phone-frame::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 126px;
-      height: 30px;
-      background: #0a0a0a;
-      border-radius: 0 0 20px 20px;
-      z-index: 100;
-    }
-
-    /* =====================================================================
-       APP VIEWPORT — everything the simulated app renders inside
-       ===================================================================== */
-    .app-viewport {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-      background: var(--brand-bg);
-    }
-
-    /* =====================================================================
-       SCREENS
-       ===================================================================== */
-    .screen {
-      position: absolute;
-      inset: 0;
-      background: var(--brand-bg);
-      display: none;
-      flex-direction: column;
-    }
-
-    .screen.active {
-      display: flex;
-    }
-
-    /* Placeholder body used until real screen content is built */
-    .screen-placeholder {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 32px;
-      text-align: center;
-    }
-
-    .screen-placeholder .phase-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--brand-primary);
-      background: var(--brand-primary-light);
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    .screen-placeholder .screen-name {
-      font-size: 17px;
-      font-weight: 600;
-      color: var(--brand-text);
-    }
-
-    .screen-placeholder .screen-id {
-      font-size: 12px;
-      color: var(--brand-text-secondary);
-      font-family: monospace;
-    }
-
-    /* =====================================================================
-       DEV NAV — temporary; will be replaced by in-app navigation controls
-       ===================================================================== */
-    .dev-nav {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      background: rgba(0, 0, 0, 0.04);
-      border-top: 1px solid var(--brand-border);
-    }
-
-    .dev-nav button {
-      padding: 5px 14px;
-      border: 1px solid var(--brand-border);
-      background: var(--brand-surface);
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-family: var(--brand-font);
-      color: var(--brand-text);
-      transition: opacity 0.15s;
-    }
-
-    .dev-nav button:hover:not(:disabled) {
-      background: var(--brand-bg);
-    }
-
-    .dev-nav button:disabled {
-      opacity: 0.3;
-      cursor: default;
-    }
-
-    .dev-nav .nav-counter {
-      font-size: 11px;
-      color: var(--brand-text-secondary);
-    }
-
-    /* =====================================================================
-       COMMENTARY PANEL
-       ===================================================================== */
-    .commentary-panel {
-      flex: 1;
-      min-width: 0;
-      align-self: stretch;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 40px;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      transition: opacity 0.2s;
-    }
-
-    .commentary-panel .phase-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--brand-accent);
-      margin-bottom: 12px;
-    }
-
-    .commentary-panel h2 {
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 20px;
-    }
-
-    .commentary-body p {
-      font-size: 14px;
-      line-height: 1.75;
-      color: rgba(255, 255, 255, 0.75);
-      margin-bottom: 14px;
-    }
-
-    .commentary-body ul {
-      margin: 4px 0 16px 0;
-      padding-left: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .commentary-body li {
-      font-size: 14px;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    .commentary-links {
-      margin-top: auto;
-      padding-top: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .commentary-links a {
-      font-size: 13px;
-      color: var(--brand-accent);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0.85;
-      transition: opacity 0.15s;
-    }
-
-    .commentary-links a::before {
-      content: '↗';
-    }
-
-    .commentary-links a:hover {
-      opacity: 1;
-      text-decoration: underline;
-    }
-
-  </style>
+  <script src="assets/react.production.min.js"></script>
+  <script src="assets/react-dom.production.min.js"></script>
+  <script src="assets/support.js"></script>
 </head>
 <body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="assets/colors_and_type.css">
+  <style>
+    @keyframes scanPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
+    @keyframes scanLine  { from{top:4%} to{top:88%} }
+    @keyframes dotBlink  { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(0.55);opacity:0.4} }
+    @keyframes fadeUp    { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes popIn     { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:#0D1B2E; font-family:'Averta',system-ui,sans-serif; min-height:100vh; }
+    .auth-step-done   { background:#3BB54A !important; }
+    .auth-step-active { background:#EEF2FF !important; }
+    .auth-step-idle   { background:#f5f5f5 !important; }
+  </style>
+</helmet>
 
-  <div class="demo-stage">
+{{ layout }}
 
-    <!-- ── Phone Frame ─────────────────────────────────────────────────── -->
-    <div class="phone-frame">
+</x-dc>
 
-      <div class="app-viewport" id="app-viewport">
+<script type="text/x-dc" data-dc-script>
 
-        <div class="screen active" data-screen="home">
-          <div class="screen-placeholder">
-            <span class="phase-label">Phase 1 · Screen 1</span>
-            <span class="screen-name">Home / Entry Point</span>
-            <span class="screen-id">home</span>
-          </div>
-        </div>
+/* ─────────────────────────────────────────────────────────────────────────────
+   PARTNER BRAND CONFIG
+   Override these values to theme the demo for any partner.
+   ───────────────────────────────────────────────────────────────────────────── */
+const BRAND = {
+  primary:      '#3BB54A',
+  secondary:    '#1A335D',
+  primaryLight: '#EBF7EE',
+  logo:         'assets/chirp-logo.svg',
+  name:         'Chirp',
+};
 
-        <div class="screen" data-screen="location-select">
-          <div class="screen-placeholder">
-            <span class="phase-label">Phase 1 · Screen 2</span>
-            <span class="screen-name">Retail Location Selector</span>
-            <span class="screen-id">location-select</span>
-          </div>
-        </div>
+/* ─────────────────────────────────────────────────────────────────────────────
+   RETAILER NETWORK
+   Add or remove retailers here — the retailer selection screen renders from
+   this array at runtime.
+   ───────────────────────────────────────────────────────────────────────────── */
+const RETAILERS = [
+  { id: 'walmart',   name: 'Walmart',      logo: 'assets/retailers/walmart.webp', fee: '$3.74', max: '$1,000' },
+  { id: 'cvs',       name: 'CVS Pharmacy', logo: 'assets/retailers/cvs.png',      fee: '$3.95', max: '$500'   },
+  { id: 'walgreens', name: 'Walgreens',    logo: 'assets/retailers/walgreens.png', fee: '$3.95', max: '$500'   },
+  { id: '7eleven',   name: '7-Eleven',     logo: 'assets/retailers/7eleven.png',  fee: '$1.50', max: '$500'   },
+];
 
-        <div class="screen" data-screen="barcode">
-          <div class="screen-placeholder">
-            <span class="phase-label">Phase 1 · Screen 3</span>
-            <span class="screen-name">Barcode Generation</span>
-            <span class="screen-id">barcode</span>
-          </div>
-        </div>
+/* ─────────────────────────────────────────────────────────────────────────────
+   STEP LABELS — shown in the left-rail step navigator
+   ───────────────────────────────────────────────────────────────────────────── */
+const STEP_LABELS = [
+  'Cash loads intro',
+  'Select retailer',
+  'Get barcode',
+  'At the register',
+  'Load confirmed',
+];
 
-        <div class="screen" data-screen="interstitial">
-          <div class="screen-placeholder">
-            <span class="phase-label">Interstitial</span>
-            <span class="screen-name">En Route to Store</span>
-            <span class="screen-id">interstitial</span>
-          </div>
-        </div>
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMMENTARY — per-screen content shown in the right panel
+   ───────────────────────────────────────────────────────────────────────────── */
+const COMMENTARY = [
+  {
+    phase:   'Phase 1 · Discovery',
+    title:   'Cash Loads — In-App Access',
+    bullets: [
+      'Customer discovers Cash Loads directly inside the Chirp partner app — no separate app or sign-up required.',
+      'Green Dot Network (GDN) powers the end-to-end experience via an embedded SDK or deep-link API.',
+      'Partner retains full brand control: colors, logo, and app chrome stay 100% Chirp.',
+    ],
+    techNote: 'Integration point: Embedded SDK widget or deep-link URI — one API key, no UI rebuild.',
+    links: [
+      { label: 'Cash Load API Reference', url: '#' },
+      { label: 'SDK Integration Guide',   url: '#' },
+    ],
+  },
+  {
+    phase:   'Phase 1 · Retailer Network',
+    title:   'Select a Retail Location',
+    bullets: [
+      '70,000+ retail locations across Walmart, CVS, Walgreens, 7-Eleven, and more nationwide.',
+      'GDN returns the retailer list, fees, and load limits in a single authenticated API response.',
+      'Fees and load caps displayed upfront — customers know exactly what to expect at the register.',
+    ],
+    techNote: 'API: GET /v1/cash-loads/retailers — returns active partners with live fee schedules.',
+    links: [
+      { label: 'Retailer Network API', url: '#' },
+      { label: 'Fee Schedule Docs',    url: '#' },
+    ],
+  },
+  {
+    phase:   'Phase 1 · Barcode Generation',
+    title:   'Secure Barcode Issuance',
+    bullets: [
+      'GDN generates a cryptographically signed, time-limited barcode unique to this load session.',
+      'The barcode encodes an account token and session ID — no account numbers are ever exposed.',
+      'Valid for 60 minutes. Customer screenshots or keeps the app open when visiting the store.',
+    ],
+    techNote: 'API: POST /v1/cash-loads/sessions — returns a signed barcode payload with expiry.',
+    links: [
+      { label: 'Session Creation API',  url: '#' },
+      { label: 'Barcode Security Spec', url: '#' },
+    ],
+  },
+  {
+    phase:   'Phase 2 · Real-Time Auth',
+    title:   'At the Register',
+    bullets: [
+      'Cashier scans the barcode on the retailer\'s existing POS hardware — zero new equipment needed.',
+      'GDN authenticates the session and authorizes the load in real time across three systems.',
+      'Customer hands over cash — no card swipe, no bank account details shared with the retailer.',
+      'Full auth round-trip completes in under 3 seconds: POS → GDN → Partner.',
+    ],
+    techNote: 'Webhook: POST /v1/cash-loads/events  ·  events: load.authorized, load.completed',
+    links: [
+      { label: 'Webhook Events Reference', url: '#' },
+      { label: 'POS Integration Guide',    url: '#' },
+    ],
+  },
+  {
+    phase:   'Phase 2 · Settlement',
+    title:   'Funds Posted Instantly',
+    bullets: [
+      'GDN pushes a real-time notification to the partner app the moment the load is confirmed.',
+      'Funds are available immediately in the customer\'s account — no hold, no next-day delay.',
+      'Partner\'s ledger updated via a settlement webhook carrying the full transaction metadata.',
+    ],
+    techNote: 'Webhook: load.completed — payload includes txn ID, amount, timestamp, and new balance.',
+    links: [
+      { label: 'Settlement Webhook Docs',      url: '#' },
+      { label: 'Real-Time Notification Guide', url: '#' },
+    ],
+  },
+];
 
-        <div class="screen" data-screen="scan">
-          <div class="screen-placeholder">
-            <span class="phase-label">Phase 2 · Screen 1</span>
-            <span class="screen-name">Barcode Scan at Register</span>
-            <span class="screen-id">scan</span>
-          </div>
-        </div>
+/* ─────────────────────────────────────────────────────────────────────────────
+   COMPONENT
+   ───────────────────────────────────────────────────────────────────────────── */
+class Component extends DCLogic {
+  state = {
+    screen:           0,
+    scanPhase:        'idle',       // 'idle' | 'scanning' | 'scanned'
+    selectedRetailer: RETAILERS[0],
+  };
 
-        <div class="screen" data-screen="remittance">
-          <div class="screen-placeholder">
-            <span class="phase-label">Phase 2 · Screen 2</span>
-            <span class="screen-name">Cash Remittance</span>
-            <span class="screen-id">remittance</span>
-          </div>
-        </div>
+  G  = BRAND.primary;
+  N  = BRAND.secondary;
+  GL = BRAND.primaryLight;
+  f  = "'Averta', system-ui, sans-serif";
 
-        <div class="screen" data-screen="confirmation">
-          <div class="screen-placeholder">
-            <span class="phase-label">Phase 2 · Screen 3</span>
-            <span class="screen-name">Load Confirmation</span>
-            <span class="screen-id">confirmation</span>
-          </div>
-        </div>
+  /* ── Lifecycle ──────────────────────────────────────────────────────────── */
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.screen === 3 && prevState.screen !== 3) {
+      this.setState({ scanPhase: 'idle' });
+      setTimeout(() => this.setState({ scanPhase: 'scanning' }), 800);
+      setTimeout(() => {
+        this.setState({ scanPhase: 'scanned' });
+        this._launchAuthModal();
+      }, 3500);
+    }
+    if (this.state.screen !== 3 && prevState.screen === 3) {
+      this.setState({ scanPhase: 'idle' });
+    }
+  }
 
-      </div><!-- /app-viewport -->
+  /* ── Navigation helpers (exposed globally for inline onclick) ───────────── */
+  goTo(idx) {
+    if (idx >= 0 && idx < 5) this.setState({ screen: idx, scanPhase: 'idle' });
+  }
 
-      <!-- Temporary dev navigation — replaced by in-app nav in Issue #4 -->
-      <div class="dev-nav">
-        <button id="btn-prev" onclick="navigate(-1)" disabled>← Back</button>
-        <span class="nav-counter" id="nav-counter"></span>
-        <button id="btn-next" onclick="navigate(1)">Next →</button>
-      </div>
+  selectRetailer(idx) {
+    this.setState({ selectedRetailer: RETAILERS[idx], screen: 2, scanPhase: 'idle' });
+  }
 
-    </div><!-- /phone-frame -->
+  /* ── Auth modal ─────────────────────────────────────────────────────────── */
+  _launchAuthModal() {
+    const { G, N, f } = this;
+    const r = this.state.selectedRetailer;
+    const steps = ['POS System', 'Green Dot Network', r.name, 'Account updated'];
+    let step = 0;
 
+    const overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed;inset:0;z-index:9999',
+      'background:rgba(0,0,0,0.7)',
+      'display:flex;align-items:center;justify-content:center',
+      'animation:popIn 0.2s ease-out',
+    ].join(';');
 
-    <!-- ── Commentary Panel ────────────────────────────────────────────── -->
-    <div class="commentary-panel" id="commentary-panel">
-      <span class="phase-badge" id="commentary-badge"></span>
-      <h2 id="commentary-title"></h2>
-      <div class="commentary-body" id="commentary-body"></div>
-      <div class="commentary-links" id="commentary-links"></div>
-    </div>
-
-  </div><!-- /demo-stage -->
-
-
-  <script>
-    // =========================================================================
-    // SCREEN ORDER
-    // Add, remove, or reorder screen IDs here to change the demo flow.
-    // Each ID must match a data-screen attribute on a .screen element above.
-    // =========================================================================
-    const SCREENS = [
-      'home',
-      'location-select',
-      'barcode',
-      'interstitial',
-      'scan',
-      'remittance',
-      'confirmation',
-    ];
-
-    // =========================================================================
-    // COMMENTARY CONTENT
-    // Keyed by screen ID. Each entry: { badge, title, body (HTML), links[] }
-    // Populated in Issue #6 — placeholders below keep the panel functional.
-    // =========================================================================
-    const COMMENTARY = {
-      'home': {
-        badge: 'Phase 1 — In App',
-        title: 'Accessing Cash Loads',
-        body: '<p>Placeholder — commentary for the home screen goes here.</p>',
-        links: [],
-      },
-      'location-select': {
-        badge: 'Phase 1 — In App',
-        title: 'Finding a Retail Location',
-        body: '<p>Placeholder — commentary for the location selector goes here.</p>',
-        links: [],
-      },
-      'barcode': {
-        badge: 'Phase 1 — In App',
-        title: 'Your Load Barcode',
-        body: '<p>Placeholder — commentary for barcode generation goes here.</p>',
-        links: [],
-      },
-      'interstitial': {
-        badge: 'Transition',
-        title: 'Heading to the Store',
-        body: '<p>Placeholder — commentary for the interstitial experience goes here.</p>',
-        links: [],
-      },
-      'scan': {
-        badge: 'Phase 2 — At the Register',
-        title: 'Barcode Scanned',
-        body: '<p>Placeholder — commentary for the scan step goes here.</p>',
-        links: [],
-      },
-      'remittance': {
-        badge: 'Phase 2 — At the Register',
-        title: 'Handing Over Cash',
-        body: '<p>Placeholder — commentary for cash remittance goes here.</p>',
-        links: [],
-      },
-      'confirmation': {
-        badge: 'Phase 2 — At the Register',
-        title: 'Load Complete',
-        body: '<p>Placeholder — commentary for the confirmation screen goes here.</p>',
-        links: [],
-      },
+    const stepHTML = (i) => {
+      const done   = i < step;
+      const active = i === step;
+      const circleBg = done ? G : active ? N : '#ccc';
+      const rowBg    = done ? '#F0FBF1' : active ? '#EEF2FF' : '#f7f7f7';
+      const icon = done
+        ? `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+        : active
+          ? `<div style="width:8px;height:8px;border-radius:50%;background:#fff;animation:dotBlink 0.8s infinite"></div>`
+          : `<div style="width:8px;height:8px;border-radius:50%;background:#bbb"></div>`;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:${rowBg};transition:background 0.35s">
+          <div style="width:30px;height:30px;border-radius:50%;background:${circleBg};flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background 0.35s">${icon}</div>
+          <span style="font-size:14px;font-weight:${active?'600':'400'};color:${active?N:'#666'};font-family:${f}">${steps[i]}</span>
+          ${done ? `<span style="margin-left:auto;font-size:11px;font-weight:600;color:${G}">✓</span>` : ''}
+        </div>`;
     };
 
-    // =========================================================================
-    // STATE
-    // =========================================================================
-    let currentIndex = 0;
+    const render = () => {
+      overlay.innerHTML = `
+        <div style="background:#fff;border-radius:24px;padding:32px;width:300px;font-family:${f};box-shadow:0 32px 64px rgba(0,0,0,0.3)">
+          <div style="text-align:center;margin-bottom:24px">
+            <div style="width:52px;height:52px;background:${G};border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="5" width="20" height="14" rx="3" stroke="white" stroke-width="2"/>
+                <path d="M2 10h20" stroke="white" stroke-width="2"/>
+              </svg>
+            </div>
+            <div style="font-size:18px;font-weight:700;color:${N}">Authorizing cash load</div>
+            <div style="font-size:13px;color:#888;margin-top:4px">Connecting with Green Dot Network…</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${steps.map((_, i) => stepHTML(i)).join('')}
+          </div>
+        </div>`;
+    };
 
-    // =========================================================================
-    // NAVIGATION
-    // =========================================================================
-    function navigate(delta) {
-      goTo(currentIndex + delta);
+    render();
+    document.body.appendChild(overlay);
+
+    const advance = () => {
+      step++;
+      if (step >= steps.length) {
+        setTimeout(() => {
+          overlay.remove();
+          this.goTo(4);
+        }, 600);
+        return;
+      }
+      render();
+      setTimeout(advance, 1800);
+    };
+    setTimeout(advance, 1800);
+  }
+
+  /* ── Helpers ────────────────────────────────────────────────────────────── */
+  _barcode() {
+    // Decorative Code-128–style barcode
+    const w = [3,1,2,1,3,1,1,2,3,1,2,1,1,3,2,1,1,2,1,3,1,2,1,1,3,1,2,3,1,1,2,1,3,1,1,2,3,1,2,1];
+    let x = 8; let bars = '';
+    for (let i = 0; i < w.length; i++) {
+      if (i % 2 === 0) bars += `<rect x="${x}" y="0" width="${w[i]*3}" height="80" fill="#111"/>`;
+      x += w[i] * 3;
     }
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${x+8}" height="80" viewBox="0 0 ${x+8} 80">${bars}</svg>`;
+  }
 
-    function goTo(index) {
-      if (index < 0 || index >= SCREENS.length) return;
+  _statusBar(light) {
+    const c = light ? '#fff' : '#111';
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px 4px;font-size:13px;font-weight:600;color:${c};font-family:${this.f}">
+        <span>9:41</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="${c}"><rect x="0" y="6" width="2.5" height="5" rx="0.6"/><rect x="3.5" y="3.5" width="2.5" height="7.5" rx="0.6"/><rect x="7" y="1.5" width="2.5" height="9.5" rx="0.6"/><rect x="10.5" y="0" width="2.5" height="11" rx="0.6" opacity="0.3"/></svg>
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0.5" y="0.5" width="14" height="10" rx="2" stroke="${c}" stroke-width="1.2"/><rect x="14.5" y="3.5" width="2" height="4" rx="1" fill="${c}"/><rect x="1.5" y="1.5" width="9" height="8" rx="1.5" fill="${c}"/></svg>
+        </div>
+      </div>`;
+  }
 
-      // Swap active screen
-      document.querySelector('.screen.active')?.classList.remove('active');
-      currentIndex = index;
-      const screenId = SCREENS[currentIndex];
-      document.querySelector(`.screen[data-screen="${screenId}"]`)?.classList.add('active');
+  _navHeader(title, light, targetScreen) {
+    const c = light ? '#fff' : this.N;
+    const bg = light ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)';
+    return `
+      <div style="display:flex;align-items:center;padding:6px 16px 14px;gap:6px">
+        <div onclick="window._c.goTo(${targetScreen})"
+             style="width:34px;height:34px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="${c}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span style="font-size:17px;font-weight:700;color:${c};font-family:${this.f}">${title}</span>
+      </div>`;
+  }
 
-      // Update commentary
-      const c = COMMENTARY[screenId] || {};
-      document.getElementById('commentary-badge').textContent  = c.badge || '';
-      document.getElementById('commentary-title').textContent  = c.title || '';
-      document.getElementById('commentary-body').innerHTML     = c.body  || '';
+  /* ── Screen 1: Intro ────────────────────────────────────────────────────── */
+  _screen1() {
+    const { G, N, GL, f } = this;
+    return `
+      ${this._statusBar(false)}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 10px">
+        <img src="${BRAND.logo}" alt="${BRAND.name}" style="height:30px;object-fit:contain">
+        <div style="width:34px;height:34px;border-radius:50%;background:${GL};display:flex;align-items:center;justify-content:center">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="${G}" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="${G}" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:0 18px 24px">
+        <div style="border-radius:18px;overflow:hidden;margin-bottom:18px;position:relative;min-height:148px;background:${N}">
+          <img src="assets/greendot-logo.jpg" alt="" style="width:100%;height:148px;object-fit:cover;opacity:0.35">
+          <div style="position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;justify-content:flex-end">
+            <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:3px">Green Dot Network</div>
+            <div style="font-size:20px;font-weight:800;color:#fff;line-height:1.25">Load cash at 70,000+<br>retail locations</div>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="font-size:20px;font-weight:800;color:${N};margin-bottom:6px;font-family:${f}">Cash Loads</div>
+          <div style="font-size:14px;color:#555;line-height:1.65">Add money to your ${BRAND.name} account at any participating retailer — no bank visit, no card required.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:22px">
+          ${[
+            ['🏪','Walmart, CVS, Walgreens &amp; more'],
+            ['⚡','Funds available instantly'],
+            ['🔒','Secure, tokenized transaction'],
+            ['💵','Load $20–$1,000 per visit'],
+          ].map(([ico,txt]) => `
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 14px;background:${GL};border-radius:11px">
+              <span style="font-size:18px">${ico}</span>
+              <span style="font-size:13.5px;color:${N};font-weight:500;font-family:${f}">${txt}</span>
+            </div>`).join('')}
+        </div>
+        <button onclick="window._c.goTo(1)"
+                style="width:100%;padding:15px;background:${G};color:#fff;border:none;border-radius:13px;font-size:16px;font-weight:700;font-family:${f};cursor:pointer">
+          Load cash now
+        </button>
+        <div style="text-align:center;margin-top:13px;font-size:11px;color:#999;font-family:${f}">
+          Powered by <strong style="color:${N}">Green Dot Network</strong>
+        </div>
+      </div>`;
+  }
 
-      const linksEl = document.getElementById('commentary-links');
-      linksEl.innerHTML = '';
-      (c.links || []).forEach(({ label, url }) => {
-        const a = document.createElement('a');
-        a.href        = url;
-        a.textContent = label;
-        a.target      = '_blank';
-        a.rel         = 'noopener noreferrer';
-        linksEl.appendChild(a);
-      });
+  /* ── Screen 2: Select Retailer ──────────────────────────────────────────── */
+  _screen2() {
+    const { G, N, GL, f } = this;
+    return `
+      <div style="background:${N};padding-bottom:2px">
+        ${this._statusBar(true)}
+        ${this._navHeader('Select retailer', true, 0)}
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 24px">
+        <div style="font-size:12.5px;color:#999;margin-bottom:12px;font-family:${f}">${RETAILERS.length} participating retailers</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          ${RETAILERS.map((r, i) => `
+            <div onclick="window._c.selectRetailer(${i})"
+                 style="background:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.07)">
+              <div style="width:60px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <img src="${r.logo}" alt="${r.name}" style="max-width:60px;max-height:36px;object-fit:contain">
+              </div>
+              <div style="flex:1">
+                <div style="font-size:15px;font-weight:700;color:${N};font-family:${f}">${r.name}</div>
+                <div style="font-size:12px;color:#888;margin-top:2px">Up to ${r.max} · Fee ${r.fee}</div>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#ccc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:18px;padding:12px 14px;background:#FFFAED;border-radius:11px;border-left:3px solid #F5A623">
+          <div style="font-size:12.5px;color:#8B6914;font-family:${f};line-height:1.55">
+            <strong>Tip:</strong> Fees vary by retailer and are charged by the cashier at time of load.
+          </div>
+        </div>
+      </div>`;
+  }
 
-      // Update dev nav controls
-      document.getElementById('btn-prev').disabled    = currentIndex === 0;
-      document.getElementById('btn-next').disabled    = currentIndex === SCREENS.length - 1;
-      document.getElementById('nav-counter').textContent =
-        `${currentIndex + 1} / ${SCREENS.length}`;
-    }
+  /* ── Screen 3: Barcode ──────────────────────────────────────────────────── */
+  _screen3() {
+    const { G, N, GL, f } = this;
+    const r = this.state.selectedRetailer;
+    return `
+      <div style="background:#fff;border-bottom:1px solid #f0f0f0">
+        ${this._statusBar(false)}
+        ${this._navHeader('Your barcode', false, 1)}
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;background:#F6F7F9">
+        <div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:11px;padding:10px 14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+          <img src="${r.logo}" alt="${r.name}" style="height:26px;object-fit:contain">
+          <span style="font-size:14px;font-weight:600;color:${N};font-family:${f}">${r.name}</span>
+          <span style="margin-left:auto;font-size:12px;color:#888;flex-shrink:0">Fee: ${r.fee}</span>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:22px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-bottom:14px">
+          <div style="font-size:11px;color:#aaa;letter-spacing:0.09em;text-transform:uppercase;font-family:${f};margin-bottom:10px">Show cashier to scan</div>
+          <div style="overflow:hidden;max-width:100%">${this._barcode()}</div>
+          <div style="font-family:monospace;font-size:12.5px;color:#777;letter-spacing:0.14em;margin-top:10px">GDN-2847-9361-0042</div>
+        </div>
+        <div style="background:${GL};border-radius:12px;padding:13px 15px;margin-bottom:18px">
+          <div style="font-size:13px;color:${N};font-family:${f};line-height:1.6">
+            <strong>At the register:</strong> Tell the cashier you'd like to add cash using a Green Dot barcode, then show this screen.
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:18px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#aaa" stroke-width="2"/><path d="M12 7v5l3 3" stroke="#aaa" stroke-width="2" stroke-linecap="round"/></svg>
+          <span style="font-size:13px;color:#888;font-family:${f}">Expires in <strong style="color:${N}">59:23</strong></span>
+        </div>
+        <button onclick="window._c.goTo(3)"
+                style="width:100%;padding:15px;background:${N};color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:700;font-family:${f};cursor:pointer">
+          I'm at the register →
+        </button>
+      </div>`;
+  }
 
-    // =========================================================================
-    // INIT
-    // =========================================================================
-    goTo(0);
-  </script>
+  /* ── Screen 4: At the register ──────────────────────────────────────────── */
+  _screen4() {
+    const { G, N, GL, f } = this;
+    const r = this.state.selectedRetailer;
+    const { scanPhase } = this.state;
 
+    const scanBorder  = scanPhase !== 'idle' ? `2px solid ${G}` : '2px solid #e5e5e5';
+    const scanAnim    = scanPhase === 'scanning' ? `animation:scanPulse 1.4s ease-in-out infinite` : '';
+    const statusLabel = scanPhase === 'idle'     ? 'Hold up barcode for cashier to scan'
+                      : scanPhase === 'scanning' ? 'Scanning…'
+                      :                            '✓ Barcode scanned';
+    const statusColor = scanPhase === 'scanned'  ? G : scanPhase === 'scanning' ? N : '#666';
+
+    return `
+      <div style="background:#fff;border-bottom:1px solid #f0f0f0">
+        ${this._statusBar(false)}
+        ${this._navHeader('At the register', false, 2)}
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 24px;background:#F6F7F9">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px">
+          <img src="${r.logo}" alt="${r.name}" style="height:22px;object-fit:contain">
+          <span style="font-size:13px;color:#777;font-family:${f}">Loading at ${r.name}</span>
+        </div>
+        <div style="background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-bottom:16px">
+          <div style="padding:18px 18px 0;text-align:center">
+            <div style="font-size:14px;font-weight:600;color:${statusColor};font-family:${f};margin-bottom:10px">${statusLabel}</div>
+          </div>
+          <div style="position:relative;margin:0 18px 18px;border-radius:11px;overflow:hidden;border:${scanBorder};${scanAnim}">
+            <div style="padding:14px;background:#fff;overflow:hidden">${this._barcode()}</div>
+            ${scanPhase === 'scanning' ? `
+              <div style="position:absolute;left:0;right:0;top:4%;height:2.5px;background:${G};opacity:0.85;box-shadow:0 0 8px ${G};animation:scanLine 1.4s linear infinite"></div>
+            ` : ''}
+            ${scanPhase === 'scanned' ? `
+              <div style="position:absolute;inset:0;background:rgba(59,181,74,0.1);display:flex;align-items:center;justify-content:center">
+                <div style="background:${G};border-radius:50%;width:54px;height:54px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(59,181,74,0.4)">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+        ${scanPhase === 'idle' ? `
+          <div style="background:${GL};border-radius:12px;padding:13px 15px">
+            <div style="font-size:13px;color:${N};font-family:${f};line-height:1.6">
+              <strong>What to expect:</strong> After scanning, hand the cashier your cash. A service fee of <strong>${r.fee}</strong> will be collected at the register.
+            </div>
+          </div>
+        ` : `
+          <div style="text-align:center;padding:4px">
+            <div style="font-size:13px;color:#999;font-family:${f}">
+              ${scanPhase === 'scanning' ? 'Please wait — contacting Green Dot Network…' : 'Authorizing with Green Dot Network…'}
+            </div>
+          </div>
+        `}
+      </div>`;
+  }
+
+  /* ── Screen 5: Confirmed ────────────────────────────────────────────────── */
+  _screen5() {
+    const { G, N, GL, f } = this;
+    const r   = this.state.selectedRetailer;
+    const fee = parseFloat(r.fee.replace('$', ''));
+    const net = (200 - fee).toFixed(2);
+    return `
+      <div style="background:linear-gradient(155deg,${G} 0%,#28924B 100%);padding-bottom:36px">
+        ${this._statusBar(true)}
+        <div style="text-align:center;padding:16px 20px 0">
+          <div style="width:68px;height:68px;background:rgba(255,255,255,0.18);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(255,255,255,0.08)">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="font-size:26px;font-weight:800;color:#fff;font-family:${f}">Load Complete!</div>
+          <div style="font-size:40px;font-weight:800;color:#fff;margin:6px 0;font-family:${f}">$200.00</div>
+          <div style="font-size:13.5px;color:rgba(255,255,255,0.8);font-family:${f}">added to your ${BRAND.name} account</div>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px 16px 24px;background:#F6F7F9;margin-top:-18px">
+        <div style="background:#fff;border-radius:18px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.07);margin-bottom:14px">
+          <div style="font-size:11px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:12px;font-family:${f}">Transaction Summary</div>
+          ${[
+            ['Retailer',        r.name,       false],
+            ['Cash handed over','$200.00',    false],
+            ['Service fee',     r.fee,        false],
+            ['Net to account',  '$'+net,      false],
+            ['New balance',     '$547.23',    true],
+          ].map(([k,v,bold]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f4f4f4;font-family:${f}">
+              <span style="font-size:14px;color:#777">${k}</span>
+              <span style="font-size:14px;font-weight:${bold?700:500};color:${bold?N:'#333'}">${v}</span>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:11px;background:#fff;border-radius:13px;padding:13px;box-shadow:0 1px 5px rgba(0,0,0,0.06);margin-bottom:20px">
+          <div style="width:36px;height:36px;background:${GL};border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="${G}" stroke-width="2"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="${G}" stroke-width="2"/></svg>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:${N};font-family:${f}">Push notification sent</div>
+            <div style="font-size:12.5px;color:#999;margin-top:2px">Your account updated in real time via GDN webhook</div>
+          </div>
+        </div>
+        <button onclick="window._c.goTo(0)"
+                style="width:100%;padding:15px;background:${N};color:#fff;border:none;border-radius:13px;font-size:16px;font-weight:700;font-family:${f};cursor:pointer">
+          Done
+        </button>
+      </div>`;
+  }
+
+  /* ── Step nav (left rail) ───────────────────────────────────────────────── */
+  _stepNav() {
+    const { G, f } = this;
+    const s = this.state.screen;
+    return STEP_LABELS.map((label, i) => {
+      const done   = i < s;
+      const active = i === s;
+      const circleBg = (done || active) ? G : 'rgba(255,255,255,0.15)';
+      const numCol   = (done || active) ? '#fff' : 'rgba(255,255,255,0.4)';
+      const textCol  = active ? '#fff' : done ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.38)';
+      const rowBg    = active ? 'rgba(255,255,255,0.09)' : 'transparent';
+      const icon     = done
+        ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+        : `<span style="color:${numCol};font-size:11px;font-weight:700">${i+1}</span>`;
+      return `
+        <div onclick="window._c.goTo(${i})"
+             style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;cursor:pointer;background:${rowBg}">
+          <div style="width:26px;height:26px;border-radius:50%;background:${circleBg};flex-shrink:0;display:flex;align-items:center;justify-content:center">${icon}</div>
+          <span style="font-size:13px;color:${textCol};font-family:${f};font-weight:${active?'600':'400'};white-space:nowrap">${label}</span>
+        </div>
+        ${i < STEP_LABELS.length - 1 ? `<div style="width:2px;height:14px;background:rgba(255,255,255,0.12);margin-left:22px"></div>` : ''}`;
+    }).join('');
+  }
+
+  /* ── Commentary panel ───────────────────────────────────────────────────── */
+  _commentary() {
+    const c = COMMENTARY[this.state.screen];
+    const { G, N, f } = this;
+    return `
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.45);margin-bottom:9px;font-family:${f}">${c.phase}</div>
+      <h2 style="font-size:23px;font-weight:800;color:#fff;margin-bottom:18px;line-height:1.25;font-family:${f}">${c.title}</h2>
+      <ul style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px;padding:0;list-style:none">
+        ${c.bullets.map(b => `
+          <li style="display:flex;gap:9px;font-size:14px;color:rgba(255,255,255,0.72);line-height:1.65;font-family:${f}">
+            <span style="color:${G};flex-shrink:0;margin-top:3px;font-size:12px">▸</span>
+            <span>${b}</span>
+          </li>`).join('')}
+      </ul>
+      ${c.techNote ? `
+        <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:12px 14px;margin-bottom:22px;font-family:'SFMono-Regular',Consolas,monospace;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.55;word-break:break-all">${c.techNote}</div>
+      ` : ''}
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+        ${c.links.map(l => `
+          <a href="${l.url}" style="font-size:13px;color:rgba(255,255,255,0.5);text-decoration:none;display:flex;align-items:center;gap:6px;font-family:${f}"
+             onmouseover="this.style.color='rgba(255,255,255,0.9)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+            <span style="font-size:10px">↗</span>${l.label}
+          </a>`).join('')}
+      </div>`;
+  }
+
+  /* ── Main render ────────────────────────────────────────────────────────── */
+  renderVals() {
+    // Expose instance for onclick handlers
+    window._c = this;
+
+    const { screen } = this.state;
+    const screens = [
+      this._screen1(),
+      this._screen2(),
+      this._screen3(),
+      this._screen4(),
+      this._screen5(),
+    ];
+
+    const layout = `
+      <div style="display:flex;align-items:flex-start;gap:28px;padding:36px 40px;min-height:100vh;max-width:1280px;margin:0 auto">
+
+        <!-- ── Step nav ─────────────────────────────────────────────────── -->
+        <div style="width:192px;flex-shrink:0;padding-top:56px">
+          <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.13em;color:rgba(255,255,255,0.32);margin-bottom:14px;font-family:${this.f}">Demo flow</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            ${this._stepNav()}
+          </div>
+        </div>
+
+        <!-- ── Phone frame ──────────────────────────────────────────────── -->
+        <div style="flex-shrink:0">
+          <div style="width:378px;height:713px;background:#fff;border-radius:50px;border:10px solid #111;box-shadow:inset 0 0 0 1px #2a2a2a,0 0 0 1px #0a0a0a,0 32px 72px rgba(0,0,0,0.65);overflow:hidden;position:relative;display:flex;flex-direction:column">
+            <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:118px;height:26px;background:#111;border-radius:0 0 16px 16px;z-index:100"></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;padding-top:6px">
+              ${screens[screen]}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Commentary ───────────────────────────────────────────────── -->
+        <div style="flex:1;min-width:0;align-self:stretch;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:36px 36px 32px;display:flex;flex-direction:column">
+          ${this._commentary()}
+        </div>
+
+      </div>`;
+
+    return { layout };
+  }
+}
+
+</script>
 </body>
 </html>
